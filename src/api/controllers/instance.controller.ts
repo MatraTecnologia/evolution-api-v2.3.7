@@ -70,6 +70,8 @@ export class InstanceController {
         number: instanceData.number,
         businessId: instanceData.businessId,
         status: instanceData.status,
+        userId: instanceData.userId,
+        workspaceId: instanceData.workspaceId,
       });
 
       instance.setInstance({
@@ -397,6 +399,11 @@ export class InstanceController {
         state: this.waMonitor.waInstances[instanceName]?.connectionStatus?.state,
       },
     };
+  }
+
+  public async getInstance({ instanceName }: InstanceDto) {
+    const instances = await this.waMonitor.instanceInfo([instanceName]);
+    return instances?.[0] || null;
   }
 
   public async fetchInstances({ instanceName, instanceId, number }: InstanceDto, key: string) {
