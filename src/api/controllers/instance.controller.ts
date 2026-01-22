@@ -402,6 +402,9 @@ export class InstanceController {
   }
 
   public async getInstance({ instanceName }: InstanceDto) {
+    if (!instanceName) {
+      throw new BadRequestException('instanceName is required');
+    }
     const instances = await this.waMonitor.instanceInfo([instanceName]);
     return instances?.[0] || null;
   }
