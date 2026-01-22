@@ -406,8 +406,9 @@ export class InstanceController {
     return instances?.[0] || null;
   }
 
-  public async fetchInstances({ instanceName, instanceId, number }: InstanceDto, key: string) {
+  public async fetchInstances({ instanceName, instanceId, number, userId, workspaceId }: InstanceDto, key: string) {
     const env = this.configService.get<Auth>('AUTHENTICATION').API_KEY;
+    const filters = { userId, workspaceId };
 
     if (env.KEY !== key) {
       const instancesByKey = await this.prismaRepository.instance.findMany({
@@ -415,13 +416,15 @@ export class InstanceController {
           token: key,
           name: instanceName || undefined,
           id: instanceId || undefined,
+          userId: userId || undefined,
+          workspaceId: workspaceId || undefined,
         },
       });
 
       if (instancesByKey.length > 0) {
         const names = instancesByKey.map((instance) => instance.name);
 
-        return this.waMonitor.instanceInfo(names);
+        return this.waMonitor.instanceInfo(names, filters);
       } else {
         throw new UnauthorizedException();
       }
@@ -433,7 +436,7 @@ export class InstanceController {
 
     const instanceNames = instanceName ? [instanceName] : null;
 
-    return this.waMonitor.instanceInfo(instanceNames);
+    return this.waMonitor.instanceInfo(instanceNames, filters);
   }
 
   public async setPresence({ instanceName }: InstanceDto, data: SetPresenceDto) {

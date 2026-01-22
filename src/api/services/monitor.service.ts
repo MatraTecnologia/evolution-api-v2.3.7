@@ -83,7 +83,10 @@ export class WAMonitoringService {
     }
   }
 
-  public async instanceInfo(instanceNames?: string[]): Promise<any> {
+  public async instanceInfo(
+    instanceNames?: string[],
+    filters?: { userId?: string; workspaceId?: string },
+  ): Promise<any> {
     if (instanceNames && instanceNames.length > 0) {
       const inexistentInstances = instanceNames ? instanceNames.filter((instance) => !this.waInstances[instance]) : [];
 
@@ -96,7 +99,7 @@ export class WAMonitoringService {
 
     const clientName = this.configService.get<Database>('DATABASE').CONNECTION.CLIENT_NAME;
 
-    const where =
+    const where: any =
       instanceNames && instanceNames.length > 0
         ? {
             name: {
@@ -105,6 +108,14 @@ export class WAMonitoringService {
             clientName,
           }
         : { clientName };
+
+    if (filters?.userId) {
+      where.userId = filters.userId;
+    }
+
+    if (filters?.workspaceId) {
+      where.workspaceId = filters.workspaceId;
+    }
 
     const instances = await this.prismaRepository.instance.findMany({
       where,
